@@ -54,15 +54,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val email = extras.getString("Email")
         val phone = extras.getString("Phone")
         val pos = extras.getString("Position")
-        val array = extras.get("Equipment") as Array<Int>
-        val equip = mutableListOf<Int>()
-        for (index in 0..array.count()-1) {
-            equip.add(array[index])
+        currentUser = User(ID,PIN,priv,fname,sname,dob,addr,email,phone,pos)
+        if (priv == "Employee") {
+            println("emp")
+            val array = extras.get("Equipment") as Array<Int>
+            val equip = mutableListOf<Int>()
+            for (index in 0..array.count()-1) {
+                equip.add(array[index])
+            }
+            currentUser.Equipment = equip
+        } else {
+            println("admn")
+            currentUser.Password = extras.getString("Password")
+            // TODO enable admin functions
         }
 
-        println("Now?")
-
-        currentUser = User(ID,PIN,priv,fname,sname,dob,addr,email,phone,pos,equip)
 
         println("And now?")
 
@@ -72,10 +78,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         println("How about now?")
 
-        var testString: String = ""
+        /*var testString: String = ""
         for (index in 0..3){
             testString = testString.plus(currentUser.Equipment[index])
-        }
+        }*/
 
         println("Still?")
 
