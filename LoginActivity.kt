@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.Window
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -33,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
             // Instantiate the RequestQueue.
 
             val queue = Volley.newRequestQueue(this)
-            val url = "http://10.0.1.42:9000/get/login.php?id=$id&pin=$pin"
+            val url = GlobalVars.serverURL+"/get/login.php?id=$id&pin=$pin"
             println(url)
 
             // Request a string response from the provided URL.
@@ -60,16 +61,17 @@ class LoginActivity : AppCompatActivity() {
                                 pwDialogBuilder.setCancelable(false)
                                 pwDialogBuilder.setTitle("Enter Password")
                                 pwDialogBuilder.setPositiveButton("Sign In",{ dialogInterface: DialogInterface, i: Int -> })
+                                pwDialogBuilder.setNegativeButton("Cancel",{ dialogInterface: DialogInterface, i: Int -> })
                                 val pwDialog = pwDialogBuilder.create()
                                 pwDialog.show()
                                 pwDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener({
                                     val pwField = pwDialogView.findViewById<EditText>(R.id.password_field)
                                     if (pwField.text.toString() == password){
                                         val intent = authorizedAdmin(userJson)
-                                        println("intent created")
                                         startActivity(intent)
                                     } else {
-                                        println("Incorrect password")
+                                        Toast.makeText(baseContext,"Incorrect Password", Toast.LENGTH_SHORT).show()
+                                        //pwDialog.dismiss()
                                     }
                                 })
 
