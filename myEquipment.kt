@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.app.Fragment
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -52,6 +53,8 @@ class myEquipment : Fragment() {
         layoutManager = LinearLayoutManager(this.activity.applicationContext)
         val recycler = view.findViewById<RecyclerView>(R.id.myEquipListView)
         recycler.layoutManager = layoutManager
+        val divider = DividerItemDecoration(recycler.context,layoutManager.orientation)
+        recycler.addItemDecoration(divider)
         adapter = myEquipAdapter(GlobalVars.empEquipment)
         recycler.adapter = adapter
 

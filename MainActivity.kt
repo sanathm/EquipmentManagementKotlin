@@ -57,6 +57,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val phone = extras.getString("Phone")
         val pos = extras.getString("Position")
         currentUser = User(ID,PIN,priv,fname,sname,dob,addr,email,phone,pos)
+
+        //TODO move to onStart()
         if (priv == "Employee") {
             println("emp")
 
@@ -73,11 +75,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                         println("Response is: ${response}")
                         val jsonArray = JSONArray(response)
-                        val equip = mutableListOf<Int>()
+                        val equip = mutableListOf<String>()
                         for (index in 0..jsonArray.length()-1) {
                             println(jsonArray[index])
                             val json = jsonArray.getJSONObject(index)
-                            val equip_id = json.getInt("equip_id")
+                            val equip_id = json.getString("equip_id")
                             equip.add(equip_id)
                             val name = json.getString("name")
                             val desc = json.getString("description")
@@ -93,6 +95,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         val fragTransaction = fragmentManager.beginTransaction()
                         fragTransaction.add(R.id.frag_container, myEquipFragment)
                         fragTransaction.commit()
+                        this.toolbar.title = "My Equipment"
 
                     },
                     Response.ErrorListener { println("Connection Error: {$url}" )})
@@ -161,7 +164,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 fragTransaction.replace(R.id.frag_container, myEquipFragment)
                 fragTransaction.addToBackStack(null)
                 fragTransaction.commit()
-                this.toolbar.title = "Manage Equipment"
+                this.toolbar.title = "Equipment"
             }
             R.id.nav_myInfo -> {
                 val myInfoFrag = myInfo()
@@ -171,10 +174,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 fragTransaction.commit()
                 this.toolbar.title = "My Details"
             }
-            R.id.nav_slideshow -> {
+            R.id.nav_employees -> {
 
             }
-            R.id.nav_manage -> {
+            R.id.nav_settings -> {
 
             }
             R.id.nav_feed -> {

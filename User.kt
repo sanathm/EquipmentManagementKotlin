@@ -4,10 +4,10 @@ import java.util.*
 
 data class User(val UserID: Int, var PIN: Int, var privelage: String, var FirstName: String, var Surname: String, var DOB: Date, var Address: String, var EmailAddress: String, var PhoneNumber: String, var Position: String) {
 
-    var Equipment: MutableList<Int> = mutableListOf()
+    var Equipment: MutableList<String> = mutableListOf()
     var Password = ""
 
-    fun removeEquipment(equipID: Int): Boolean {
+    fun removeEquipment(equipID: String): Boolean {
 
         /*for (index in 0..Equipment.count()){
             if (Equipment[index] == equipID) {

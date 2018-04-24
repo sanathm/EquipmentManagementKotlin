@@ -12,11 +12,11 @@ class EquipmentDetails : AppCompatActivity() {
         setContentView(R.layout.activity_equipment_details)
 
         val intent = getIntent()
-        val id = intent.getIntExtra("id",0)
+        val id = intent.getStringExtra("id")
         val name = intent.getStringExtra("name")
         val descrip = intent.getStringExtra("description")
 
-        equip_ID.text = id.toString()
+        equip_ID.text = id
         equip_name.setText(name,TextView.BufferType.EDITABLE)
         equip_descrip.setText(descrip,TextView.BufferType.EDITABLE)
 

@@ -44,6 +44,7 @@ class myEquipAdapter(private val equipment: MutableList<Equipment>): RecyclerVie
         fun displayData(equip: Equipment){
             this.equip = equip
             view.myequip_Name.text = equip.Name
+            view.myequip_id.text = equip.ID
         }
 
 
