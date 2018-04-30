@@ -37,6 +37,7 @@ class myEquipAdapter(private val equipment: MutableList<Equipment>): RecyclerVie
             intent.putExtra("id",equip!!.ID)
             intent.putExtra("name",equip!!.Name)
             intent.putExtra("description",equip!!.Description)
+            intent.putExtra("loaned",equip!!.Loaned)
 
             view.context.startActivity(intent)
         }

@@ -1,11 +1,14 @@
 package com.group5.sanath.equipmentmanagement
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.Window
 import android.widget.Button
 import android.widget.EditText
@@ -17,14 +20,21 @@ import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.password_dialog.*
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.*
 
 class LoginActivity : AppCompatActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_login)
+
+        val sharedPref = applicationContext.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        GlobalVars.serverURL = sharedPref.getString("server","http://10.0.1.42:9000/api")
+        GlobalVars.cameraIP = sharedPref.getString("camera","http://10.0.1.6:8080/video")
+
 
         login_button.setOnClickListener {
 
@@ -33,7 +43,7 @@ class LoginActivity : AppCompatActivity() {
 
             // Instantiate the RequestQueue.
 
-            val queue = Volley.newRequestQueue(this)
+            GlobalVars.queue = Volley.newRequestQueue(this)
             val url = GlobalVars.serverURL+"/get/login.php?id=$id&pin=$pin"
             println(url)
 
@@ -69,9 +79,9 @@ class LoginActivity : AppCompatActivity() {
                                     if (pwField.text.toString() == password){
                                         val intent = authorizedAdmin(userJson)
                                         startActivity(intent)
+                                        pwDialog.dismiss()
                                     } else {
                                         Toast.makeText(baseContext,"Incorrect Password", Toast.LENGTH_SHORT).show()
-                                        //pwDialog.dismiss()
                                     }
                                 })
 
@@ -85,13 +95,27 @@ class LoginActivity : AppCompatActivity() {
                             println("DB Error")
                         }
                     },
-                    Response.ErrorListener { println("That didn't work!" )})
+                    Response.ErrorListener {
+                        val dialog = AlertDialog.Builder(this).create()
+                        dialog.setTitle("Connection Error")
+                        dialog.setMessage("Would you like to change the network settings?")
+                        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",{ dialogInterface: DialogInterface, i: Int -> })
+                        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"Cancel",{ dialogInterface: DialogInterface, i: Int -> })
+                        dialog.show()
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener({
+                            val intent = Intent(this,Container::class.java)
+                            startActivity(intent)
+                            dialog.dismiss()
+                        })
+                    })
 
             // Add the request to the RequestQueue.
-            queue.add(stringRequest)
+           GlobalVars.queue.add(stringRequest)
 
         }
     }
+
+
 
     fun authorized(userJson: String) {
 
@@ -99,15 +123,16 @@ class LoginActivity : AppCompatActivity() {
         println(jsonString)
         val json = JSONObject(jsonString)
 
-        println("hellooo?")
-
         val intent = Intent(this,MainActivity::class.java)
         intent.putExtra("ID",json.getInt("employee_id"))
         intent.putExtra("PIN",json.getInt("pin"))
         intent.putExtra("Privelage","Employee")
         intent.putExtra("Name",json.getString("first_names"))
         intent.putExtra("Surname",json.getString("surname"))
-        intent.putExtra("DOB",Date())
+        val dateString = json.getString("date_of_birth")
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+
+        intent.putExtra("DOB",formatter.parse(dateString))
         intent.putExtra("Address",json.getString("physical_address"))
         intent.putExtra("Email",json.getString("email_address"))
         intent.putExtra("Phone",json.getString("phone_number"))
@@ -121,15 +146,15 @@ class LoginActivity : AppCompatActivity() {
 
     fun authorizedAdmin(json: JSONObject): Intent {
 
-        println("hellooo?")
-
         val intent = Intent(this,MainActivity::class.java)
         intent.putExtra("ID",json.getInt("employee_id"))
         intent.putExtra("PIN",json.getInt("pin"))
         intent.putExtra("Privelage","Admin")
         intent.putExtra("Name",json.getString("first_names"))
         intent.putExtra("Surname",json.getString("surname"))
-        intent.putExtra("DOB",Date())
+        val dateString = json.getString("date_of_birth")
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        intent.putExtra("DOB",formatter.parse(dateString))
         intent.putExtra("Address",json.getString("physical_address"))
         intent.putExtra("Email",json.getString("email_address"))
         intent.putExtra("Phone",json.getString("phone_number"))

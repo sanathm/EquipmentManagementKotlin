@@ -18,7 +18,7 @@ import kotlinx.android.synthetic.main.fragment_my_equipment.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "equip"
+private const val type = "all"
 
 /**
  * A simple [Fragment] subclass.
@@ -29,20 +29,18 @@ private const val ARG_PARAM1 = "equip"
  * create an instance of this fragment.
  *
  */
-class myEquipment : Fragment() {
+class myEquipment() : Fragment() {
     // TODO: Rename and change types of parameters
-    private var equip: String? = null
     private var listener: OnFragmentInteractionListener? = null
+    private lateinit var listType: String
     private lateinit var layoutManager : LinearLayoutManager
     private lateinit var adapter: myEquipAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            equip = it.getString(ARG_PARAM1)
+            listType = it.getString("type")
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +53,11 @@ class myEquipment : Fragment() {
         recycler.layoutManager = layoutManager
         val divider = DividerItemDecoration(recycler.context,layoutManager.orientation)
         recycler.addItemDecoration(divider)
-        adapter = myEquipAdapter(GlobalVars.empEquipment)
+        if (listType == "employee") {
+            adapter = myEquipAdapter(GlobalVars.empEquipment)
+        } else {
+            adapter = myEquipAdapter(GlobalVars.allEquipment)
+        }
         recycler.adapter = adapter
 
 
@@ -98,20 +100,12 @@ class myEquipment : Fragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment myEquipment.
-         */
-        // TODO: Rename and change types and number of parameters
+
         @JvmStatic
-        fun newInstance(equip: String) =
+        fun newInstance(type: String) =
                 myEquipment().apply {
                     arguments = Bundle().apply {
-                        putString(ARG_PARAM1, equip)
+                        putString("type",type)
                     }
                 }
     }

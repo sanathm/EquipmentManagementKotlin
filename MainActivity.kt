@@ -1,5 +1,8 @@
 package com.group5.sanath.equipmentmanagement
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -22,9 +25,10 @@ import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
+import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,myEquipment.OnFragmentInteractionListener, myInfo.OnFragmentInteractionListener, VideoFeed.OnFragmentInteractionListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,myEquipment.OnFragmentInteractionListener, myInfo.OnFragmentInteractionListener, VideoFeed.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, EmployeeList.OnFragmentInteractionListener {
 
     lateinit var currentUser: User
     var myEquipment: MutableList<Equipment> = mutableListOf()
@@ -39,6 +43,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
+
+
         /*val myEquipFragment = myEquipment()
         //myEquipFragment.arguments = intent.extras
         val fragTransaction = fragmentManager.beginTransaction()
@@ -52,6 +58,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fname = extras.getString("Name")
         val sname = extras.getString("Surname")
         val dob = extras.get("DOB") as Date
+
         val addr = extras.getString("Address")
         val email = extras.getString("Email")
         val phone = extras.getString("Phone")
@@ -65,7 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val id = currentUser.UserID
 
             // Instantiate the RequestQueue.
-            val queue = Volley.newRequestQueue(this)
+
             val url = GlobalVars.serverURL+"/get/myEquipment.php?id=$id"
             println(url)
 
@@ -91,7 +98,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         // TODO refresh ui
                         GlobalVars.empEquipment = myEquipment
 
-                        val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment()
+                        val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("employee")
                         val fragTransaction = fragmentManager.beginTransaction()
                         fragTransaction.add(R.id.frag_container, myEquipFragment)
                         fragTransaction.commit()
@@ -101,7 +108,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     Response.ErrorListener { println("Connection Error: {$url}" )})
 
             // Add the request to the RequestQueue.
-            queue.add(stringRequest)
+           GlobalVars.queue.add(stringRequest)
 
             /*
             val array = extras.get("Equipment") as Array<Int>
@@ -115,6 +122,80 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             println("admn")
             currentUser.Password = extras.getString("Password")
             // TODO enable admin functions
+
+
+            // Instantiate the RequestQueue.
+
+            val url = GlobalVars.serverURL+"/get/equipment.php"
+            println(url)
+
+            // Request a string response from the provided URL.
+            val stringRequest = StringRequest(Request.Method.GET, url,
+                    Response.Listener<String> { response ->
+
+                        println("Response is: ${response}")
+                        val jsonArray = JSONArray(response)
+                        val equip = mutableListOf<String>()
+                        for (index in 0..jsonArray.length()-1) {
+                            println(jsonArray[index])
+                            val json = jsonArray.getJSONObject(index)
+                            val equip_id = json.getString("equip_id")
+                            equip.add(equip_id)
+                            val name = json.getString("name")
+                            val desc = json.getString("description")
+                            val loaned = json.getInt("loaned_out_to")
+                            myEquipment.add(Equipment(equip_id,name,desc,loaned))
+                        }
+
+                        // TODO refresh ui
+                        GlobalVars.allEquipment = myEquipment
+
+                        val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("all")
+                        val fragTransaction = fragmentManager.beginTransaction()
+                        fragTransaction.add(R.id.frag_container, myEquipFragment)
+                        fragTransaction.commit()
+                        this.toolbar.title = "Equipment"
+
+                    },
+                    Response.ErrorListener { println("Connection Error: {$url}" )})
+
+            // Add the request to the RequestQueue.
+           GlobalVars.queue.add(stringRequest)
+            val empURL = GlobalVars.serverURL+"/get/employees.php"
+
+            val empRequest = StringRequest(Request.Method.GET, empURL,
+                    Response.Listener<String> { response ->
+
+                        println("Response is: ${response}")
+                        val jsonArray = JSONArray(response)
+                        val users = mutableListOf<User>()
+                        for (index in 0..jsonArray.length()-1) {
+                            val json = jsonArray.getJSONObject(index)
+                            val ID = json.getInt("employee_id")
+                            val PIN = json.getInt("pin")
+                            val priv = "Employee"
+                            val fname = json.getString("first_names")
+                            val sname = json.getString("surname")
+                            val dateString = json.getString("date_of_birth")
+                            val formatter = SimpleDateFormat("yyyy-MM-dd")
+                            val dob = formatter.parse(dateString)
+                            val addr = json.getString("physical_address")
+                            val email = json.getString("email_address")
+                            val phone = json.getString("phone_number")
+                            val pos = json.getString("position")
+                            users.add(User(ID,PIN,priv,fname,sname,dob,addr,email,phone,pos))
+
+                        }
+
+                        // TODO refresh ui
+                        GlobalVars.allEmployees = users
+
+                    },
+                    Response.ErrorListener { println("Connection Error: {$url}" )})
+
+            // Add the request to the RequestQueue.
+           GlobalVars.queue.add(empRequest)
+
         }
 
         GlobalVars.currentUser = currentUser
@@ -159,37 +240,69 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_myEquip -> {
-                val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment()
+                val myEquipFragment: myEquipment
+                if (currentUser.privelage == "Admin") {
+                    myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("all")
+                    this.toolbar.title = "Equipment"
+                } else {
+                    myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("employee")
+                    this.toolbar.title = "My Equipment"
+                }
                 val fragTransaction = fragmentManager.beginTransaction()
                 fragTransaction.replace(R.id.frag_container, myEquipFragment)
-                fragTransaction.addToBackStack(null)
+                //fragTransaction.addToBackStack(null)
                 fragTransaction.commit()
-                this.toolbar.title = "Equipment"
             }
             R.id.nav_myInfo -> {
                 val myInfoFrag = myInfo()
                 val fragTransaction = fragmentManager.beginTransaction()
                 fragTransaction.replace(R.id.frag_container, myInfoFrag)
-                fragTransaction.addToBackStack(null)
+                //fragTransaction.addToBackStack(null)
                 fragTransaction.commit()
                 this.toolbar.title = "My Details"
             }
             R.id.nav_employees -> {
-
+                if (GlobalVars.currentUser.privelage == "Admin") {
+                    val empFragment = EmployeeList()
+                    val fragTransaction = fragmentManager.beginTransaction()
+                    fragTransaction.replace(R.id.frag_container, empFragment)
+                    //fragTransaction.addToBackStack(null)
+                    fragTransaction.commit()
+                    this.toolbar.title = "Employees"
+                } else {
+                    val dialog = AlertDialog.Builder(this).create()
+                    dialog.setTitle("Not Authorised")
+                    dialog.setMessage("This feature is only available to administrators")
+                    dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",{ dialogInterface: DialogInterface, i: Int -> })
+                    dialog.show()
+                }
             }
             R.id.nav_settings -> {
-
+                val settings = SettingsFragment()
+                val fragTransaction = fragmentManager.beginTransaction()
+                fragTransaction.replace(R.id.frag_container, settings)
+                //fragTransaction.addToBackStack(null)
+                fragTransaction.commit()
+                this.toolbar.title = "Settings"
             }
             R.id.nav_feed -> {
-                val videoFrag = VideoFeed()
-                val fragTransaction = fragmentManager.beginTransaction()
-                fragTransaction.replace(R.id.frag_container, videoFrag)
-                fragTransaction.addToBackStack(null)
-                fragTransaction.commit()
-                this.toolbar.title = "Video Feed"
+                if (GlobalVars.currentUser.privelage == "Admin") {
+                    val videoFrag = VideoFeed()
+                    val fragTransaction = fragmentManager.beginTransaction()
+                    fragTransaction.replace(R.id.frag_container, videoFrag)
+                    //fragTransaction.addToBackStack(null)
+                    fragTransaction.commit()
+                    this.toolbar.title = "Video Feed"
+                } else {
+                    val dialog = AlertDialog.Builder(this).create()
+                    dialog.setTitle("Not Authorised")
+                    dialog.setMessage("This feature is only available to administrators")
+                    dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",{ dialogInterface: DialogInterface, i: Int -> })
+                    dialog.show()
+                }
             }
             R.id.nav_logout -> {
-
+                super.onBackPressed()
             }
         }
 

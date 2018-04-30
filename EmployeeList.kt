@@ -4,40 +4,43 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.app.Fragment
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import android.widget.VideoView
-import kotlinx.android.synthetic.main.fragment_video_feed.*
-import java.net.URL
 
+
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [VideoFeed.OnFragmentInteractionListener] interface
+ * [EmployeeList.OnFragmentInteractionListener] interface
  * to handle interaction events.
  *
  */
-class VideoFeed : Fragment() {
+class EmployeeList : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
+    private lateinit var manager: LinearLayoutManager
+    private lateinit var adapter: employeeAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_video_feed, container, false)
+        val view = inflater.inflate(R.layout.fragment_employee_list, container, false)
 
-        /*val vidView = view.findViewById<VideoView>(R.id.videoView)
-        val vidURL = Uri.parse(GlobalVars.cameraIP)
-        vidView.setVideoURI(vidURL)
-        vidView.start()*/
-
-
-
-        val web_view = view.findViewById<WebView>(R.id.webView)
-        //val dispURL = Uri.parse(GlobalVars.cameraIP)
-        web_view.loadUrl(GlobalVars.cameraIP+"?id=${GlobalVars.currentUser.UserID}&pin=${GlobalVars.currentUser.PIN}")
+        manager = LinearLayoutManager(this.activity.applicationContext)
+        val recycler = view.findViewById<RecyclerView>(R.id.employeeListView)
+        recycler.layoutManager = manager
+        val divider = DividerItemDecoration(recycler.context,manager.orientation)
+        recycler.addItemDecoration(divider)
+        adapter = employeeAdapter(GlobalVars.allEmployees)
+        recycler.adapter = adapter
 
         return view
     }

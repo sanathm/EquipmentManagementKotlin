@@ -7,40 +7,57 @@ import android.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import android.widget.VideoView
-import kotlinx.android.synthetic.main.fragment_video_feed.*
-import java.net.URL
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import kotlinx.android.synthetic.main.fragment_settings.*
+
+
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
 
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [VideoFeed.OnFragmentInteractionListener] interface
+ * [SettingsFragment.OnFragmentInteractionListener] interface
  * to handle interaction events.
  *
  */
-class VideoFeed : Fragment() {
+class SettingsFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_video_feed, container, false)
+        val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        /*val vidView = view.findViewById<VideoView>(R.id.videoView)
-        val vidURL = Uri.parse(GlobalVars.cameraIP)
-        vidView.setVideoURI(vidURL)
-        vidView.start()*/
+        val serverAddress = view.findViewById<EditText>(R.id.serverAddress)
+        val cameraAddress = view.findViewById<EditText>(R.id.cameraAddress)
+        serverAddress.setText(GlobalVars.serverURL,TextView.BufferType.EDITABLE)
+        cameraAddress.setText(GlobalVars.cameraIP,TextView.BufferType.EDITABLE)
 
-
-
-        val web_view = view.findViewById<WebView>(R.id.webView)
-        //val dispURL = Uri.parse(GlobalVars.cameraIP)
-        web_view.loadUrl(GlobalVars.cameraIP+"?id=${GlobalVars.currentUser.UserID}&pin=${GlobalVars.currentUser.PIN}")
+        val saveBtn = view.findViewById<Button>(R.id.addressSave)
+        saveBtn.setOnClickListener {
+            val sharedPref = this.activity.applicationContext.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.putString("server",serverAddress.text.toString())
+            editor.putString("camera",cameraAddress.text.toString())
+            GlobalVars.serverURL = serverAddress.text.toString()
+            GlobalVars.cameraIP = GlobalVars.serverURL+"/get/viewFeed.php"
+            if (editor.commit()){
+                Toast.makeText(activity.baseContext,"Details Saved", Toast.LENGTH_SHORT).show()
+                activity.onBackPressed()
+            } else {
+                Toast.makeText(activity.baseContext,"Error saving", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         return view
     }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
