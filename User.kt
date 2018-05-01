@@ -17,19 +17,9 @@ data class User(val UserID: Int, var PIN: Int, var privelage: String, var FirstN
     var Equipment: MutableList<String> = mutableListOf()
     var Password = ""
 
-    fun removeEquipment(equipID: String): Boolean {
-
-        /*for (index in 0..Equipment.count()){
-            if (Equipment[index] == equipID) {
-                Equipment.removeAt(index)
-            }
-        }*/
-        return Equipment.remove(equipID)
-    }
-
     fun updateDB(context: Context) {
-        //POST Request
 
+        //POST Request
         if (privelage == "Admin") {
             val url = GlobalVars.serverURL+"/post/admin.php"
             val postRequest = object : StringRequest(Request.Method.POST, url,
@@ -93,6 +83,38 @@ data class User(val UserID: Int, var PIN: Int, var privelage: String, var FirstN
             }
             GlobalVars.queue.add(postRequest)
         }
+    }
+
+    fun addtoDB(context: Context){
+        val url = GlobalVars.serverURL+"/post/addEmployee.php"
+        val postRequest = object : StringRequest(Request.Method.POST, url,
+                Response.Listener<String>() { response ->
+                    val json = JSONObject(response)
+                    if (!json.getBoolean("error")){
+                        Toast.makeText(context,json.getString("message"), Toast.LENGTH_SHORT).show()
+                    }
+                },
+                Response.ErrorListener() {
+                    Toast.makeText(context,"Error Connecting to Server", Toast.LENGTH_SHORT).show()
+                })
+        {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["id"] = UserID.toString()
+                params["pin"] = PIN.toString()
+                params["name"] = FirstName
+                params["surname"] = Surname
+                val formatter = SimpleDateFormat("yyyy-MM-dd")
+                params["dob"] = formatter.format(DOB)
+                params["address"] = Address
+                params["email"] = EmailAddress
+                params["phone"] = PhoneNumber
+                params["position"] = Position
+
+                return params
+            }
+        }
+        GlobalVars.queue.add(postRequest)
     }
 
 }

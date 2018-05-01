@@ -14,23 +14,9 @@ import android.widget.Adapter
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_my_equipment.*
 
-
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val type = "all"
 
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [myEquipment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [myEquipment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class myEquipment() : Fragment() {
-    // TODO: Rename and change types of parameters
     private var listener: OnFragmentInteractionListener? = null
     private lateinit var listType: String
     private lateinit var layoutManager : LinearLayoutManager
@@ -64,7 +50,6 @@ class myEquipment() : Fragment() {
         return view
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
         listener?.onFragmentInteraction(uri)
     }
@@ -83,19 +68,7 @@ class myEquipment() : Fragment() {
         listener = null
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
     interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         fun onFragmentInteraction(uri: Uri)
     }
 

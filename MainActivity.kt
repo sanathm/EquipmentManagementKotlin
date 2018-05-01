@@ -3,6 +3,7 @@ package com.group5.sanath.equipmentmanagement
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -43,14 +45,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
-
-
-        /*val myEquipFragment = myEquipment()
-        //myEquipFragment.arguments = intent.extras
-        val fragTransaction = fragmentManager.beginTransaction()
-        fragTransaction.add(R.id.frag_container, myEquipFragment)
-        fragTransaction.commit()*/
-
         val extras = intent.extras
         val ID = extras.getInt("ID")
         val PIN = extras.getInt("PIN")
@@ -65,26 +59,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val pos = extras.getString("Position")
         currentUser = User(ID,PIN,priv,fname,sname,dob,addr,email,phone,pos)
 
-        //TODO move to onStart()
         if (priv == "Employee") {
-            println("emp")
 
             val id = currentUser.UserID
 
             // Instantiate the RequestQueue.
 
             val url = GlobalVars.serverURL+"/get/myEquipment.php?id=$id"
-            println(url)
 
             // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        println("Response is: ${response}")
                         val jsonArray = JSONArray(response)
                         val equip = mutableListOf<String>()
                         for (index in 0..jsonArray.length()-1) {
-                            println(jsonArray[index])
                             val json = jsonArray.getJSONObject(index)
                             val equip_id = json.getString("equip_id")
                             equip.add(equip_id)
@@ -95,7 +84,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         }
                         currentUser.Equipment = equip
 
-                        // TODO refresh ui
                         GlobalVars.empEquipment = myEquipment
 
                         val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("employee")
@@ -105,39 +93,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         this.toolbar.title = "My Equipment"
 
                     },
-                    Response.ErrorListener { println("Connection Error: {$url}" )})
+                    Response.ErrorListener {
+                        Toast.makeText(baseContext,"Connection Error", Toast.LENGTH_SHORT).show()
+                    })
 
             // Add the request to the RequestQueue.
            GlobalVars.queue.add(stringRequest)
 
-            /*
-            val array = extras.get("Equipment") as Array<Int>
-            val equip = mutableListOf<Int>()
-            for (index in 0..array.count()-1) {
-                equip.add(array[index])
-            }
-            currentUser.Equipment = equip
-            */
+
         } else {
-            println("admn")
+
             currentUser.Password = extras.getString("Password")
-            // TODO enable admin functions
-
-
-            // Instantiate the RequestQueue.
 
             val url = GlobalVars.serverURL+"/get/equipment.php"
-            println(url)
 
-            // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        println("Response is: ${response}")
+
                         val jsonArray = JSONArray(response)
                         val equip = mutableListOf<String>()
                         for (index in 0..jsonArray.length()-1) {
-                            println(jsonArray[index])
+
                             val json = jsonArray.getJSONObject(index)
                             val equip_id = json.getString("equip_id")
                             equip.add(equip_id)
@@ -147,7 +124,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             myEquipment.add(Equipment(equip_id,name,desc,loaned))
                         }
 
-                        // TODO refresh ui
                         GlobalVars.allEquipment = myEquipment
 
                         val myEquipFragment = com.group5.sanath.equipmentmanagement.myEquipment.newInstance("all")
@@ -157,16 +133,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         this.toolbar.title = "Equipment"
 
                     },
-                    Response.ErrorListener { println("Connection Error: {$url}" )})
+                    Response.ErrorListener {
+                        Toast.makeText(baseContext,"Connection Error", Toast.LENGTH_SHORT).show()
+                    })
 
-            // Add the request to the RequestQueue.
-           GlobalVars.queue.add(stringRequest)
+            GlobalVars.queue.add(stringRequest)
+
             val empURL = GlobalVars.serverURL+"/get/employees.php"
 
             val empRequest = StringRequest(Request.Method.GET, empURL,
                     Response.Listener<String> { response ->
 
-                        println("Response is: ${response}")
                         val jsonArray = JSONArray(response)
                         val users = mutableListOf<User>()
                         for (index in 0..jsonArray.length()-1) {
@@ -187,13 +164,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                         }
 
-                        // TODO refresh ui
                         GlobalVars.allEmployees = users
 
                     },
-                    Response.ErrorListener { println("Connection Error: {$url}" )})
+                    Response.ErrorListener {
+                        Toast.makeText(baseContext,"Connection Error", Toast.LENGTH_SHORT).show()
+                    })
 
-            // Add the request to the RequestQueue.
            GlobalVars.queue.add(empRequest)
 
         }
@@ -210,34 +187,55 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onFragmentInteraction(uri: Uri) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            val dialog = AlertDialog.Builder(this).create()
+            dialog.setTitle("Logout")
+            dialog.setMessage("Are you sure you would like to logout?")
+            dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",{ dialogInterface: DialogInterface, i: Int -> })
+            dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"Cancel",{ dialogInterface: DialogInterface, i: Int -> })
+            dialog.show()
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener({
+                dialog.dismiss()
+                super.onBackPressed()
+            })
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
-            R.id.action_settings -> return true
+            R.id.action_addUser -> {
+                if (GlobalVars.currentUser.privelage == "Admin"){
+                    val intent = Intent(applicationContext,EmployeeDetails::class.java)
+
+                    intent.putExtra("empID",-1)
+
+                    applicationContext.startActivity(intent)
+                } else {
+                    val dialog = AlertDialog.Builder(this).create()
+                    dialog.setTitle("Not Authorised")
+                    dialog.setMessage("This feature is only available to administrators")
+                    dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",{ dialogInterface: DialogInterface, i: Int -> })
+                    dialog.show()
+                }
+
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
+        // Navigation Menu
         when (item.itemId) {
             R.id.nav_myEquip -> {
                 val myEquipFragment: myEquipment

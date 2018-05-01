@@ -32,9 +32,8 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         val sharedPref = applicationContext.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
-        GlobalVars.serverURL = sharedPref.getString("server","http://10.0.1.42:9000/api")
-        GlobalVars.cameraIP = sharedPref.getString("camera","http://10.0.1.6:8080/video")
-
+        GlobalVars.serverURL = sharedPref.getString("server","http://10.0.1.31:9000/api")
+        GlobalVars.cameraIP = sharedPref.getString("camera","http://10.0.1.31:9000/api/get/viewFeed.php")
 
         login_button.setOnClickListener {
 
@@ -45,18 +44,15 @@ class LoginActivity : AppCompatActivity() {
 
             GlobalVars.queue = Volley.newRequestQueue(this)
             val url = GlobalVars.serverURL+"/get/login.php?id=$id&pin=$pin"
-            println(url)
 
             // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        println("Response is: ${response}")
                         val json = JSONObject(response)
                         if (!json.getBoolean("error")){
                             val message = json.getString("message")
                             if (message == "Success") {
-                                println(json.getString("user"))
                                 authorized(json.getString("user"))
                             } else if (message == "Admin"){
 
@@ -65,6 +61,7 @@ class LoginActivity : AppCompatActivity() {
                                 val userJson = JSONObject(jsonString)
                                 val password = userJson.getString("password")
 
+                                //Request password
                                 val pwDialogBuilder = AlertDialog.Builder(this)
                                 val pwDialogView = layoutInflater.inflate(R.layout.password_dialog,null)
                                 pwDialogBuilder.setView(pwDialogView)
@@ -87,12 +84,10 @@ class LoginActivity : AppCompatActivity() {
 
 
                             } else {
-                                // TODO handle incorrect details
-                                println("Incorrect Details")
+                                Toast.makeText(baseContext,"Server Error. Please try again later", Toast.LENGTH_SHORT).show()
                             }
                         } else {
-                            // TODO handle db error
-                            println("DB Error")
+                            Toast.makeText(baseContext,"Database Error. Please try again later", Toast.LENGTH_SHORT).show()
                         }
                     },
                     Response.ErrorListener {
@@ -120,7 +115,6 @@ class LoginActivity : AppCompatActivity() {
     fun authorized(userJson: String) {
 
         val jsonString = userJson.substring(1,userJson.length-1)
-        println(jsonString)
         val json = JSONObject(jsonString)
 
         val intent = Intent(this,MainActivity::class.java)

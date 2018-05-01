@@ -18,6 +18,6 @@ class Container : AppCompatActivity(),SettingsFragment.OnFragmentInteractionList
     }
 
     override fun onFragmentInteraction(uri: Uri) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }

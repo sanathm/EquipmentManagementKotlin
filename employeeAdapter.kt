@@ -37,6 +37,7 @@ class employeeAdapter(private val employees: MutableList<User>):RecyclerView.Ada
             val intent = Intent(view.context,EmployeeDetails::class.java)
 
             intent.putExtra("empID",employee!!.UserID)
+            //intent.putExtra("empID",-1)
 
             view.context.startActivity(intent)
         }

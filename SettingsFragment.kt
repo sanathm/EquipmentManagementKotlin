@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.app.Fragment
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,18 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_settings.*
 
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-
-
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [SettingsFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- *
- */
 class SettingsFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
 
@@ -37,15 +26,16 @@ class SettingsFragment : Fragment() {
         val cameraAddress = view.findViewById<EditText>(R.id.cameraAddress)
         serverAddress.setText(GlobalVars.serverURL,TextView.BufferType.EDITABLE)
         cameraAddress.setText(GlobalVars.cameraIP,TextView.BufferType.EDITABLE)
+        //cameraAddress.inputType = InputType.TYPE_NULL
 
         val saveBtn = view.findViewById<Button>(R.id.addressSave)
         saveBtn.setOnClickListener {
             val sharedPref = this.activity.applicationContext.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
             val editor = sharedPref.edit()
             editor.putString("server",serverAddress.text.toString())
-            editor.putString("camera",cameraAddress.text.toString())
             GlobalVars.serverURL = serverAddress.text.toString()
             GlobalVars.cameraIP = GlobalVars.serverURL+"/get/viewFeed.php"
+            editor.putString("camera",GlobalVars.cameraIP)
             if (editor.commit()){
                 Toast.makeText(activity.baseContext,"Details Saved", Toast.LENGTH_SHORT).show()
                 activity.onBackPressed()
@@ -58,8 +48,6 @@ class SettingsFragment : Fragment() {
     }
 
 
-
-    // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
         listener?.onFragmentInteraction(uri)
     }
@@ -78,19 +66,9 @@ class SettingsFragment : Fragment() {
         listener = null
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
+
     interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+
         fun onFragmentInteraction(uri: Uri)
     }
 
